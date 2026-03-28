@@ -411,6 +411,20 @@ async def reset_scraper():
     return {"status": "reset"}
 
 
+@router.get("/debug-state")
+async def debug_state():
+    try:
+        import playwright
+        pw_version = playwright.__version__
+    except ImportError as e:
+        pw_version = f"NOT INSTALLED: {e}"
+    return {
+        "state": {k: v for k, v in _state.items() if k not in ("logs", "task")},
+        "logs": list(_state["logs"])[-20:],
+        "playwright": pw_version,
+    }
+
+
 class ExtractSingleRequest(BaseModel):
     maps_url: str
 
