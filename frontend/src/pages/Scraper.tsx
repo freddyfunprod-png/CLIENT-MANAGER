@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Search, StopCircle, MapPin, Star, Globe } from 'lucide-react'
-import { getCategories, startScrape, stopScrape, addCategory, deleteCategory, setCategorySourceType } from '../api'
+import { getCategories, startScrape, stopScrape, resetScraper, addCategory, deleteCategory, setCategorySourceType } from '../api'
 import type { Page, ScraperSettings } from '../types'
 import ScraperSettingsPanel from '../components/ScraperSettings'
 
@@ -196,6 +196,13 @@ export default function Scraper({ onNavigate }: Props) {
 
   const handleStop = async () => {
     await stopScrape()
+  }
+
+  const handleReset = async () => {
+    await resetScraper()
+    setStatus({ running: false, found_urls: 0, visited: 0, leads_count: 0, total_urls: 0, done: false, error: null, new_logs: [] })
+    setLogs([])
+    setError('')
   }
 
   const handleSetSourceType = async (key: string, sourceType: 'maps' | 'instagram') => {
@@ -466,6 +473,15 @@ export default function Scraper({ onNavigate }: Props) {
               style={{ background: 'var(--danger)' }}
             >
               <StopCircle size={16} /> Detener
+            </button>
+          )}
+          {!running && (
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors"
+              style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+            >
+              Resetear estado
             </button>
           )}
 

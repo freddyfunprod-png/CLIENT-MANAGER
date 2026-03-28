@@ -35,6 +35,8 @@ export const startScrape = (body: {
 
 export const stopScrape = () => req<{ status: string }>(`${BASE}/scrape/stop`, { method: 'POST' })
 
+export const resetScraper = () => req<{ status: string }>(`${BASE}/scrape/reset`, { method: 'POST' })
+
 export const getScraperSettings = () => req<ScraperSettings>(`${BASE}/scrape/settings`)
 
 export const updateScraperSettings = (s: Partial<ScraperSettings>) =>
