@@ -154,7 +154,7 @@ export default function Scraper({ onNavigate }: Props) {
 
   const startSSE = () => {
     if (esRef.current) esRef.current.close()
-    const es = new EventSource('/api/scrape/status')
+    const es = new EventSource('https://client-manager-uusn.onrender.com/api/scrape/status')
     esRef.current = es
     es.onmessage = (e) => {
       const data: ScrapeStatus = JSON.parse(e.data)
