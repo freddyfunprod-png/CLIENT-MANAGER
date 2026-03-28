@@ -395,6 +395,15 @@ async def stop_scrape():
     return {"status": "stopping"}
 
 
+@router.post("/reset")
+async def reset_scraper():
+    _state["running"] = False
+    _state["stop_flag"] = True
+    _state["done"] = True
+    _state["error"] = None
+    return {"status": "reset"}
+
+
 class ExtractSingleRequest(BaseModel):
     maps_url: str
 
