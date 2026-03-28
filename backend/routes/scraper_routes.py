@@ -105,11 +105,18 @@ async def _load_settings() -> dict:
 
 
 async def _run_scrape(body: ScrapeRequest) -> None:
-    from scraper.browser import browser_session
-    from scraper.maps_search import collect_place_urls
-    from scraper.maps_extractor import extract_place
-    from scraper.filters import passes_filters
-    from scraper.website_checker import has_real_website
+    try:
+        from scraper.browser import browser_session
+        from scraper.maps_search import collect_place_urls
+        from scraper.maps_extractor import extract_place
+        from scraper.filters import passes_filters
+        from scraper.website_checker import has_real_website
+    except ImportError as e:
+        _state["error"] = f"Dependencia no instalada en servidor: {e}"
+        _log(f"❌ {_state['error']}", "error")
+        _state["running"] = False
+        _state["done"] = True
+        return
 
     # Load settings first
     settings = await _load_settings()
