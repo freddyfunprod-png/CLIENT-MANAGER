@@ -199,10 +199,13 @@ export default function Scraper({ onNavigate }: Props) {
   }
 
   const handleReset = async () => {
+    if (esRef.current) { esRef.current.close(); esRef.current = null }
     await resetScraper()
-    setStatus({ running: false, found_urls: 0, visited: 0, leads_count: 0, total_urls: 0, done: false, error: null, new_logs: [] })
+    const cleared = { running: false, found_urls: 0, visited: 0, leads_count: 0, total_urls: 0, done: true, error: null, new_logs: [] }
+    setStatus(cleared)
     setLogs([])
     setError('')
+    try { sessionStorage.removeItem(STATUS_KEY); sessionStorage.removeItem(LOGS_KEY) } catch {}
   }
 
   const handleSetSourceType = async (key: string, sourceType: 'maps' | 'instagram') => {
