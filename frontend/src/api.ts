@@ -1,6 +1,6 @@
 import type { Client, ClientStatus, Goals, ScraperSettings } from './types'
 
-const BASE = (import.meta.env.VITE_API_URL || '') + '/api'
+const BASE = 'https://client-manager-uusn.onrender.com/api'
 
 async function req<T>(url: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(url, {
