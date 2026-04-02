@@ -66,6 +66,16 @@ async def generate_message(body: AIMessageRequest):
     lang_map = {"es": "español", "pt": "portugués (Brasil)", "en": "inglés"}
     lang_name = lang_map.get(body.language or "es", "español")
 
+    # Anti-Slop: reglas de estilo humano para mensajes de venta
+    antislop = (
+        "\n\nESTILO OBLIGATORIO:"
+        "\n- Escribe como persona real, no como IA. Cero frases tipo 'en el panorama actual', 'es fundamental', 'cabe destacar'."
+        "\n- Nada de contrastes formulaicos ('no es X, sino Y'). Di las cosas directo."
+        "\n- Voz activa. Sin adverbios vacíos (realmente, simplemente, literalmente, básicamente)."
+        "\n- Sin jargon corporativo: 'potenciar', 'navegar desafíos', 'sinergia', 'game-changer'."
+        "\n- Tono natural: como si un vendedor experimentado escribiera un WhatsApp a un conocido."
+    )
+
     if body.base_message and body.base_message.strip():
         prompt = f"""Eres un vendedor profesional de landing pages para negocios locales.
 Tengo este mensaje base que quiero que personalices para este cliente específico:
@@ -82,7 +92,7 @@ Datos del negocio:
 - Ciudad: {client.get('city', '')} {client.get('country', '')}
 - Rating Google: {client.get('rating', '')} estrellas
 {"- Contexto adicional: " + body.extra_context if body.extra_context else ""}
-"""
+{antislop}"""
     else:
         prompt = f"""Eres un vendedor profesional de landing pages para negocios locales.
 Escribe un mensaje de WhatsApp corto y natural (máximo 5 líneas) para hacer un {msg_desc}.
@@ -96,7 +106,8 @@ Datos del negocio:
 {"- Contexto adicional: " + body.extra_context if body.extra_context else ""}
 
 El negocio NO tiene sitio web propio. Ofrécele una landing page profesional.
-Tono: amigable, directo, sin spam. Escribe solo el mensaje, sin explicaciones."""
+Tono: amigable, directo, sin spam. Escribe solo el mensaje, sin explicaciones.
+{antislop}"""
 
     last_err = "No se intentó ningún modelo"
     async with httpx.AsyncClient(timeout=30) as http:

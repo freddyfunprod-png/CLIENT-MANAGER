@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Plus, Pencil, Trash2, Phone, CheckSquare, ExternalLink, Search, StickyNote, X, Share2, Copy, Check, Download, Globe, Settings, Send, MapPin, Instagram, CalendarPlus, MessageCircle, StopCircle } from 'lucide-react'
-import { getClients, deleteClient, updateClient, getVendors, createVendor, updateVendor, deleteVendor, getCategories, scheduleFollowup, waBulkSend, waStop, waDailyCount, getTemplates, markContacted } from '../api'
+import { getClients, deleteClient, updateClient, getVendors, createVendor, updateVendor, deleteVendor, getCategories, scheduleFollowup, waBulkSend, waStop, waDailyCount, waGetConfig, waSetConfig, getTemplates, markContacted } from '../api'
 import type { Vendor } from '../api'
 import type { Client, ClientStatus } from '../types'
 import StatusBadge from '../components/StatusBadge'
@@ -544,8 +544,23 @@ export default function Clients({ onOpenChecklist }: Props) {
               )}
             </div>
             {waDailyInfo && (
-              <div className="text-xs px-3 py-2 rounded-lg" style={{ background: 'var(--bg-base)', color: 'var(--text-secondary)' }}>
-                Enviados hoy: {waDailyInfo.sent_today}/{waDailyInfo.max_daily} · Disponibles: {waDailyInfo.remaining}
+              <div className="text-xs px-3 py-2 rounded-lg flex items-center gap-3" style={{ background: 'var(--bg-base)', color: 'var(--text-secondary)' }}>
+                <span>Enviados hoy: {waDailyInfo.sent_today}/{waDailyInfo.max_daily} · Disponibles: {waDailyInfo.remaining}</span>
+                <label className="flex items-center gap-1 ml-auto">
+                  <span>Límite/día:</span>
+                  <input
+                    type="number" min={5} max={40} value={waDailyInfo.max_daily}
+                    className="w-14 px-1.5 py-0.5 rounded border text-center text-xs"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                    onChange={async (e) => {
+                      const v = parseInt(e.target.value)
+                      if (v >= 5 && v <= 40) {
+                        const res = await waSetConfig(v)
+                        setWaDailyInfo({ ...waDailyInfo, max_daily: res.max_daily, remaining: Math.max(0, res.max_daily - waDailyInfo.sent_today) })
+                      }
+                    }}
+                  />
+                </label>
               </div>
             )}
             {!waSending && !waDone && (

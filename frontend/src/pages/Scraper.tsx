@@ -43,6 +43,7 @@ const LOGS_KEY   = 'scraper-logs'
 const DEFAULT_FORM = {
   category_key: '',
   city: '',
+  state: '',
   country: '',
   timezone: 'America/Sao_Paulo',
   limit: 50,
@@ -179,15 +180,15 @@ export default function Scraper({ onNavigate }: Props) {
   }
 
   const handleStart = async () => {
-    if (!form.category_key || !form.city.trim() || !form.country.trim()) {
-      setError('Completa categoría, ciudad y país')
+    if (!form.category_key || !form.country.trim()) {
+      setError('Completa categoría y país')
       return
     }
     setError('')
     setLogs([])
     try { sessionStorage.removeItem(LOGS_KEY) } catch {}
     try {
-      await startScrape(form)
+      await startScrape({ ...form, state: form.state || '' })
       startSSE()
     } catch (e: any) {
       setError(e.message)
@@ -305,7 +306,7 @@ export default function Scraper({ onNavigate }: Props) {
 
           <div>
             <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>
-              Ciudad
+              Ciudad <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opcional)</span>
             </label>
             <input
               className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none"
@@ -319,7 +320,21 @@ export default function Scraper({ onNavigate }: Props) {
 
           <div>
             <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>
-              País
+              Estado <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opcional)</span>
+            </label>
+            <input
+              className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none"
+              style={{ background: 'var(--bg-base)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+              placeholder="Santa Catarina"
+              value={form.state}
+              onChange={e => updateForm({ state: e.target.value })}
+              disabled={!!running}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--text-secondary)' }}>
+              País *
             </label>
             <input
               className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none"

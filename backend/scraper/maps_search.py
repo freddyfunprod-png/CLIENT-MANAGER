@@ -47,8 +47,10 @@ async def collect_place_urls(
     city: str,
     country: str,
     limit: int | None = None,
+    state: str = "",
 ) -> list[str]:
-    query = f"{category_query} en {city} {country}"
+    location_parts = [p for p in [city, state, country] if p.strip()]
+    query = f"{category_query} en {' '.join(location_parts)}"
     encoded = urllib.parse.quote(query)
     url = f"{MAPS_SEARCH_BASE}{encoded}/"
 

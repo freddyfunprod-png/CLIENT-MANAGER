@@ -22,6 +22,7 @@ from config import GEMINI_API_KEY
 from database import DB_PATH
 
 WA_SESSION_PATH = Path(DB_PATH).parent / "wa_session.json"
+WA_CONFIG_PATH  = Path(DB_PATH).parent / "wa_config.json"
 
 MODELS_TO_TRY = [
     ("v1beta", "gemini-2.5-flash"),
@@ -32,7 +33,26 @@ MODELS_TO_TRY = [
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 
-MAX_DAILY = 20
+DEFAULT_MAX_DAILY = 30
+MIN_DAILY = 5
+MAX_DAILY_CAP = 40
+
+
+def _get_max_daily() -> int:
+    try:
+        if WA_CONFIG_PATH.exists():
+            cfg = json.loads(WA_CONFIG_PATH.read_text(encoding="utf-8"))
+            return max(MIN_DAILY, min(MAX_DAILY_CAP, int(cfg.get("max_daily", DEFAULT_MAX_DAILY))))
+    except Exception:
+        pass
+    return DEFAULT_MAX_DAILY
+
+
+def _set_max_daily(value: int) -> int:
+    clamped = max(MIN_DAILY, min(MAX_DAILY_CAP, value))
+    WA_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    WA_CONFIG_PATH.write_text(json.dumps({"max_daily": clamped}), encoding="utf-8")
+    return clamped
 
 # Persistent browser instance — stays open until user closes it manually
 _browser_instance = None
@@ -100,7 +120,9 @@ async def _gemini_personalize(template_body: str, contact: dict) -> str:
         f"- Si tiene Google Maps o web, podés hacer referencia a lo que viste\n"
         f"- Máximo 5 líneas, natural, listo para enviar por WhatsApp\n"
         f"- NO incluyas saludo genérico ni explicaciones\n"
-        f"- Responde SOLO con el mensaje, sin comillas ni prefijos"
+        f"- Responde SOLO con el mensaje, sin comillas ni prefijos\n"
+        f"- ESTILO: escribe como persona real, no como IA. Cero muletillas ('es fundamental', 'cabe destacar'). "
+        f"Voz activa, sin adverbios vacíos, sin jargon corporativo. Tono natural de vendedor experimentado."
     )
 
     async with httpx.AsyncClient(timeout=20) as http:
@@ -141,17 +163,18 @@ async def _send_bulk(lead_ids: list[int], message: str, use_ai: bool = False, te
         )
         leads = [dict(r) for r in await cur.fetchall()]
 
+    max_daily = _get_max_daily()
     today_sent = await _daily_sent_count()
-    if today_sent >= MAX_DAILY:
-        _wa_state["error"] = f"Límite diario alcanzado ({MAX_DAILY}/día)"
+    if today_sent >= max_daily:
+        _wa_state["error"] = f"Límite diario alcanzado ({max_daily}/día)"
         _wa_state["running"] = False
         _wa_state["done"] = True
         return
 
-    available = MAX_DAILY - today_sent
+    available = max_daily - today_sent
     leads = leads[:available]
     _wa_state["total"] = len(leads)
-    _wa_log(f"Iniciando envío a {len(leads)} leads ({today_sent}/{MAX_DAILY} enviados hoy)")
+    _wa_log(f"Iniciando envío a {len(leads)} leads ({today_sent}/{max_daily} enviados hoy)")
 
     try:
         global _browser_instance, _browser_ctx, _browser_page, _playwright_instance
@@ -326,8 +349,9 @@ async def bulk_send(body: BulkSendRequest):
         raise HTTPException(400, "No hay leads seleccionados")
     if not body.message.strip():
         raise HTTPException(400, "El mensaje no puede estar vacío")
-    if len(body.lead_ids) > MAX_DAILY:
-        raise HTTPException(400, f"Máximo {MAX_DAILY} por día")
+    max_daily = _get_max_daily()
+    if len(body.lead_ids) > max_daily:
+        raise HTTPException(400, f"Máximo {max_daily} por día")
 
     _wa_state.update({
         "running": True,
@@ -383,5 +407,21 @@ async def wa_status():
 
 @router.get("/daily-count")
 async def daily_count():
+    max_daily = _get_max_daily()
     cnt = await _daily_sent_count()
-    return {"sent_today": cnt, "max_daily": MAX_DAILY, "remaining": max(0, MAX_DAILY - cnt)}
+    return {"sent_today": cnt, "max_daily": max_daily, "remaining": max(0, max_daily - cnt)}
+
+
+class WaConfigRequest(BaseModel):
+    max_daily: int
+
+
+@router.get("/config")
+async def get_config():
+    return {"max_daily": _get_max_daily(), "min": MIN_DAILY, "max": MAX_DAILY_CAP}
+
+
+@router.put("/config")
+async def set_config(body: WaConfigRequest):
+    new_val = _set_max_daily(body.max_daily)
+    return {"max_daily": new_val, "min": MIN_DAILY, "max": MAX_DAILY_CAP}

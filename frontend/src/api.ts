@@ -27,7 +27,8 @@ export const getCategories = () => req<{ categories: { key: string; label: strin
 
 export const startScrape = (body: {
   category_key: string
-  city: string
+  city?: string
+  state?: string
   country: string
   timezone: string
   limit: number
@@ -185,6 +186,12 @@ export const markContacted = (client_ids: number[], vendor_name?: string) =>
     body: JSON.stringify({ client_ids, vendor_name }),
   })
 export const waDailyCount = () => req<{ sent_today: number; max_daily: number; remaining: number }>(`${BASE}/whatsapp/daily-count`)
+export const waGetConfig = () => req<{ max_daily: number; min: number; max: number }>(`${BASE}/whatsapp/config`)
+export const waSetConfig = (max_daily: number) =>
+  req<{ max_daily: number; min: number; max: number }>(`${BASE}/whatsapp/config`, {
+    method: 'PUT',
+    body: JSON.stringify({ max_daily }),
+  })
 
 // ── Google Calendar ────────────────────────────────────────────────────────────
 export const scheduleFollowup = (client_id: number, date: string, note?: string) =>

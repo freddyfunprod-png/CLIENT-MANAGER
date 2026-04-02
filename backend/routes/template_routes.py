@@ -200,6 +200,8 @@ async def generate_ai_messages(body: GenerateAIRequest):
         f"- Estilo solicitado: {body.style_directive}\n"
         f"{base_section}\n"
         f"Cada mensaje debe ser personalizado, máximo 5 líneas, directo y listo para WhatsApp.\n"
+        f"ESTILO: escribe como persona real, no como IA. Cero muletillas ('es fundamental', 'cabe destacar', 'en el panorama actual'). "
+        f"Voz activa, sin adverbios vacíos, sin jargon corporativo ('potenciar', 'sinergia'). Tono natural de vendedor experimentado.\n"
         f"NO incluyas explicaciones ni numeración fuera del JSON.\n"
         f'Devuelve SOLO un JSON válido: {{"options": ["mensaje1", "mensaje2", "mensaje3"]}}'
     )

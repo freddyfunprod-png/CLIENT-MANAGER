@@ -59,7 +59,8 @@ def _reset() -> None:
 # ── Pydantic models ───────────────────────────────────────────────────────────
 class ScrapeRequest(BaseModel):
     category_key: str
-    city: str
+    city: str = ""
+    state: str = ""
     country: str
     timezone: str = "America/Sao_Paulo"
     limit: int | None = None  # if None, use max_results from settings
@@ -128,7 +129,8 @@ async def _run_scrape(body: ScrapeRequest) -> None:
         _row = await _cur.fetchone()
     category_query = _row[0] if _row else body.category_key
     source_type = _row[1] if _row else 'maps'
-    _log(f"🔍 Buscando '{category_query}' en {body.city}, {body.country} [fuente: {source_type}]")
+    location_parts = [p for p in [body.city, body.state, body.country] if p.strip()]
+    _log(f"🔍 Buscando '{category_query}' en {', '.join(location_parts)} [fuente: {source_type}]")
 
     try:
         # Cargar URLs ya procesadas para no repetir
@@ -205,7 +207,7 @@ async def _run_scrape(body: ScrapeRequest) -> None:
             else:
                 # Maps scraping
                 urls = await collect_place_urls(
-                    page, category_query, body.city, body.country, effective_limit
+                    page, category_query, body.city, body.country, effective_limit, body.state
                 )
 
                 # Filtrar ya procesados
