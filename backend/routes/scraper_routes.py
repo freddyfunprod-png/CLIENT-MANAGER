@@ -417,7 +417,7 @@ async def reset_scraper():
 async def debug_state():
     try:
         import playwright
-        pw_version = playwright.__version__
+        pw_version = getattr(playwright, '__version__', 'installed')
     except ImportError as e:
         pw_version = f"NOT INSTALLED: {e}"
     return {
