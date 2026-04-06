@@ -30,12 +30,14 @@ class ClientCreate(BaseModel):
     status: str = "prospect"
     notes: Optional[str] = None
     assigned_to: Optional[str] = None
+    source: Optional[str] = None
     lead_id: Optional[int] = None
 
 
 class ClientUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
+    email: Optional[str] = None
     category: Optional[str] = None
     city: Optional[str] = None
     country: Optional[str] = None
@@ -47,6 +49,7 @@ class ClientUpdate(BaseModel):
     status: Optional[str] = None
     notes: Optional[str] = None
     assigned_to: Optional[str] = None
+    source: Optional[str] = None
 
 
 class LeadsConvert(BaseModel):
@@ -90,12 +93,12 @@ async def create_client(body: ClientCreate):
         cursor = await db.execute(
             """INSERT INTO clients
                (name, phone, email, category, city, country, rating, link_googlemaps,
-                website, instagram, landing_url, status, notes, lead_id)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                website, instagram, landing_url, status, notes, source, lead_id)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 body.name, body.phone, body.email, body.category, body.city, body.country,
                 body.rating, body.link_googlemaps, body.website, body.instagram,
-                body.landing_url, body.status, body.notes, body.lead_id,
+                body.landing_url, body.status, body.notes, body.source or 'manual', body.lead_id,
             ),
         )
         client_id = cursor.lastrowid

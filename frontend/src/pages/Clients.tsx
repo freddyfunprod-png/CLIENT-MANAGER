@@ -943,7 +943,25 @@ export default function Clients({ onOpenChecklist }: Props) {
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</p>
+                      {c.source && c.source !== 'manual' && (() => {
+                        const sourceMap: Record<string, { label: string; color: string }> = {
+                          whatsapp:      { label: 'WA',      color: '#25D366' },
+                          landing:       { label: 'Landing', color: '#8B5CF6' },
+                          'landing-promo': { label: 'Promo', color: '#F59E0B' },
+                          'web-chat':    { label: 'Chat',    color: '#60A5FA' },
+                          scraper:       { label: 'Scraper', color: '#6B7280' },
+                        }
+                        const s = sourceMap[c.source] ?? { label: c.source, color: '#6B7280' }
+                        return (
+                          <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                            style={{ background: s.color + '22', color: s.color, border: `1px solid ${s.color}44` }}>
+                            {s.label}
+                          </span>
+                        )
+                      })()}
+                    </div>
                     {c.category && (
                       <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{c.category}</p>
                     )}

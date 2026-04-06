@@ -32,6 +32,8 @@ export interface Client {
   status: ClientStatus
   notes: string | null
   assigned_to: string | null
+  source: string | null
+  email: string | null
   lead_id: number | null
   created_at: string
   updated_at: string
