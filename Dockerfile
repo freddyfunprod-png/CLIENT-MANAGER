@@ -3,6 +3,9 @@ FROM mcr.microsoft.com/playwright/python:v1.49.0-jammy
 
 WORKDIR /app
 
+# Headers de Python necesarios para compilar extensiones C (greenlet, etc.)
+RUN apt-get update && apt-get install -y python3-dev gcc g++ && rm -rf /var/lib/apt/lists/*
+
 # Instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
