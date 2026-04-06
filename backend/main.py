@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -43,9 +43,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8000", "http://127.0.0.1:5173",
-                   "https://client-manager-blush-zeta.vercel.app"],
-    allow_origin_regex=r"https://client-manager.*\.vercel\.app",
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:5173",
+        "https://client-manager-blush-zeta.vercel.app",
+        "https://client-manager-uusn.onrender.com",
+    ],
+    allow_origin_regex=r"https://(client-manager.*\.vercel\.app|.*\.onrender\.com|.*\.railway\.app|.*\.up\.railway\.app)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,9 +85,9 @@ if DIST.exists():
     @app.get("/", include_in_schema=False)
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str = ""):
-        # Don't intercept API routes
-        if full_path.startswith("api/") or full_path == "docs":
-            return
+        # Don't intercept API routes or docs
+        if full_path.startswith("api/") or full_path in ("docs", "openapi.json"):
+            raise HTTPException(status_code=404)
         index = DIST / "index.html"
         if index.exists():
             return FileResponse(str(index))

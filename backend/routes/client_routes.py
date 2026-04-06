@@ -18,6 +18,7 @@ CLIENT_STATUSES = ["prospect", "contacted", "proposal", "negotiating", "closed",
 class ClientCreate(BaseModel):
     name: str
     phone: Optional[str] = None
+    email: Optional[str] = None
     category: Optional[str] = None
     city: Optional[str] = None
     country: Optional[str] = None
@@ -88,11 +89,11 @@ async def create_client(body: ClientCreate):
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
             """INSERT INTO clients
-               (name, phone, category, city, country, rating, link_googlemaps,
+               (name, phone, email, category, city, country, rating, link_googlemaps,
                 website, instagram, landing_url, status, notes, lead_id)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                body.name, body.phone, body.category, body.city, body.country,
+                body.name, body.phone, body.email, body.category, body.city, body.country,
                 body.rating, body.link_googlemaps, body.website, body.instagram,
                 body.landing_url, body.status, body.notes, body.lead_id,
             ),

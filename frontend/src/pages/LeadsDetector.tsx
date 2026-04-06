@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { Zap, ExternalLink, AlertCircle } from 'lucide-react'
 
-const DETECTOR_URL = 'http://localhost:8001'
+const DETECTOR_URL = (import.meta.env.VITE_DETECTOR_URL as string | undefined) ?? 'http://localhost:8001'
 
 export default function LeadsDetector() {
   const [available, setAvailable] = useState<boolean | null>(null)

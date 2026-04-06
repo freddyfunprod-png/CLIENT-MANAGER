@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS clients (
     landing_url     TEXT,
     status          TEXT DEFAULT 'prospect',
     notes           TEXT,
+    email           TEXT,
     assigned_to     TEXT,
     lead_id         INTEGER REFERENCES leads(id),
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -142,6 +143,7 @@ async def init_db() -> None:
             "ALTER TABLE leads ADD COLUMN instagram TEXT",
             "ALTER TABLE leads ADD COLUMN followers INTEGER",
             "ALTER TABLE message_templates ADD COLUMN pipeline_stage TEXT NOT NULL DEFAULT 'any'",
+            "ALTER TABLE clients ADD COLUMN email TEXT",
         ]:
             try:
                 await db.execute(migration)
