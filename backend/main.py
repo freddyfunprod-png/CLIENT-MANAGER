@@ -22,6 +22,7 @@ from routes.vendor_routes import router as vendor_router
 from routes.template_routes import router as template_router
 from routes.whatsapp_routes import router as whatsapp_router
 from routes.calendar_routes import router as calendar_router
+from routes.backup_routes import router as backup_router
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -42,7 +43,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8000", "http://127.0.0.1:5173", "https://client-manager-blush-zeta.vercel.app"],
+    allow_origins=["http://localhost:5173", "http://localhost:8000", "http://127.0.0.1:5173",
+                   "https://client-manager-blush-zeta.vercel.app"],
+    allow_origin_regex=r"https://client-manager.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,6 +60,7 @@ app.include_router(vendor_router)
 app.include_router(template_router)
 app.include_router(whatsapp_router)
 app.include_router(calendar_router)
+app.include_router(backup_router)
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
