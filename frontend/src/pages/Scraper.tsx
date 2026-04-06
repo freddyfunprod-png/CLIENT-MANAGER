@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Search, StopCircle, MapPin, Star, Globe } from 'lucide-react'
-import { getCategories, startScrape, stopScrape, resetScraper, addCategory, deleteCategory, setCategorySourceType } from '../api'
+import { getCategories, startScrape, stopScrape, resetScraper, addCategory, deleteCategory, setCategorySourceType, API_BASE } from '../api'
 import type { Page, ScraperSettings } from '../types'
 import ScraperSettingsPanel from '../components/ScraperSettings'
 
@@ -155,7 +155,7 @@ export default function Scraper({ onNavigate }: Props) {
 
   const startSSE = () => {
     if (esRef.current) esRef.current.close()
-    const es = new EventSource('https://client-manager-uusn.onrender.com/api/scrape/status')
+    const es = new EventSource(`${API_BASE}/scrape/status`)
     esRef.current = es
     es.onmessage = (e) => {
       const data: ScrapeStatus = JSON.parse(e.data)
