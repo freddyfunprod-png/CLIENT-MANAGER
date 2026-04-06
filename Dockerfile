@@ -1,20 +1,29 @@
-# Imagen oficial de Playwright para Python — incluye Chromium y todas sus dependencias
-FROM mcr.microsoft.com/playwright/python:v1.49.0-jammy
+# Python 3.11 estable — compatible con greenlet, playwright, etc.
+FROM python:3.11-slim-bullseye
 
 WORKDIR /app
 
-# Forzar wheel binario de greenlet (compatible Python 3.12) antes del resto
-RUN pip install --no-cache-dir --only-binary=:all: "greenlet>=3.1.1"
+# Dependencias del sistema necesarias para Playwright/Chromium
+RUN apt-get update && apt-get install -y \
+    wget curl gnupg ca-certificates \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+    libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
+    libxfixes3 libxrandr2 libgbm1 libasound2 \
+    libpango-1.0-0 libcairo2 libx11-xcb1 libxcb1 \
+    libxcursor1 libxi6 libxtst6 libglib2.0-0 \
+    fonts-liberation libappindicator3-1 xdg-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 # Instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Instalar Chromium de Playwright (ya tiene pip, solo falta el browser)
+RUN playwright install chromium
+
 # Copiar el código
 COPY . .
 
-# Puerto que usa Render (variable de entorno $PORT, default 10000)
 EXPOSE 10000
 
-# Iniciar desde la carpeta backend
 CMD ["sh", "-c", "cd backend && uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
