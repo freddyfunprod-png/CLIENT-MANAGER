@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar Chromium de Playwright (ya tiene pip, solo falta el browser)
-RUN playwright install chromium
+# Instalar Chromium de Playwright (non-fatal: puede fallar en Render free tier)
+RUN playwright install chromium || echo "⚠️ Playwright install failed — WhatsApp bulk unavailable"
 
 # Copiar el código
 COPY . .
