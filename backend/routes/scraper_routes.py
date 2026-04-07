@@ -629,3 +629,26 @@ async def scrape_status():
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@router.post("/leads/bulk", status_code=200)
+async def bulk_insert_leads(payload: list):
+    """Bulk insert leads from backup. Uses INSERT OR IGNORE — safe to run multiple times."""
+    inserted = 0
+    skipped = 0
+    cols = ["search_query","city","country","name","category","rating","num_reviews",
+            "phone","website_raw","website_detected","link_googlemaps","scraped_at",
+            "converted","instagram","followers"]
+    async with aiosqlite.connect(DB_PATH) as db:
+        for row in payload:
+            values = [row.get(c) for c in cols]
+            try:
+                await db.execute(
+                    f"INSERT OR IGNORE INTO leads ({','.join(cols)}) VALUES ({','.join(['?']*len(cols))})",
+                    values,
+                )
+                inserted += 1
+            except Exception:
+                skipped += 1
+        await db.commit()
+    return {"inserted": inserted, "skipped": skipped}

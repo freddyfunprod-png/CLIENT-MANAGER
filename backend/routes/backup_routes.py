@@ -5,9 +5,10 @@ Use these to sync your local SQLite to the Render instance.
 import json
 import logging
 from datetime import datetime
+from typing import Any
 
 import aiosqlite
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 
 from database import DB_PATH
@@ -41,7 +42,7 @@ async def export_db():
 
 
 @router.post("/import")
-async def import_db(payload: dict):
+async def import_db(payload: Any = Body(...)):
     """
     Import DB data from a backup JSON.
     Only inserts rows that don't exist (OR IGNORE).
