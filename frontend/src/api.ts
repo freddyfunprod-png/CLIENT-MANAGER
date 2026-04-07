@@ -129,7 +129,7 @@ export const getMessageTypes = () =>
   req<{ types: { key: string; label: string }[] }>(`${BASE}/ai/message-types`)
 
 export async function addCategory(key: string, label: string, sourceType: 'maps' | 'instagram' = 'maps') {
-  const r = await fetch('/api/scrape/categories', {
+  const r = await fetch(`${BASE}/scrape/categories`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ key, label, source_type: sourceType }),
@@ -139,7 +139,7 @@ export async function addCategory(key: string, label: string, sourceType: 'maps'
 }
 
 export async function setCategorySourceType(key: string, sourceType: 'maps' | 'instagram') {
-  const r = await fetch(`/api/scrape/categories/${key}/source-type`, {
+  const r = await fetch(`${BASE}/scrape/categories/${key}/source-type`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ source_type: sourceType }),
@@ -149,7 +149,7 @@ export async function setCategorySourceType(key: string, sourceType: 'maps' | 'i
 }
 
 export async function deleteCategory(key: string) {
-  await fetch(`/api/scrape/categories/${key}`, { method: 'DELETE' })
+  await fetch(`${BASE}/scrape/categories/${key}`, { method: 'DELETE' })
 }
 
 export const generateMessage = (client_id: number, message_type: string, extra_context?: string, language?: string, base_message?: string) =>
