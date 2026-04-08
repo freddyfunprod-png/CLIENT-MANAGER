@@ -3,7 +3,7 @@ services:
     name: client-manager
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --app-dir backend
     plan: free
     envVars:
       - key: GEMINI_API_KEY
