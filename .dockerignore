@@ -1,0 +1,38 @@
+# Control de versiones
+.git
+.gitignore
+
+# Directorios Claude (worktrees, configs)
+.claude/
+backend/.claude/
+
+# Frontend builds y node_modules (no se sirven desde el backend)
+frontend/
+client-manager/
+
+# Datos locales
+data/
+*.db
+crm_backup.json
+*.bak
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Entornos virtuales
+.env
+*.env
+venv/
+env/
+
+# Windows scripts (no necesarios en Docker)
+*.bat
+*.ps1
+sync_to_render.bat
+build.bat
+dev.bat
+start.bat
