@@ -1,8 +1,9 @@
 services:
   - type: web
     name: client-manager
-    runtime: docker
-    dockerfilePath: ./Dockerfile
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     plan: free
     envVars:
       - key: GEMINI_API_KEY
